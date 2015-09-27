@@ -1,0 +1,46 @@
+---
+title: "Statistical Inference Course Project Part 2"
+author: "RossAW"
+date: "27 September 2015"
+output: pdf_document
+---
+
+In the second portion of the class, we're going to analyze the ToothGrowth data in the R datasets package.
+
+###Loading the Data and Providing a basic summary
+```{r}
+library(datasets)
+library(dplyr)
+library(ggplot2)
+
+TGData<-ToothGrowth
+SummarisedData<-summarise(group_by(TGData,supp,dose),
+                     MeanLen = mean(len,na.rm = TRUE))
+
+
+ggplot(SummarisedData, aes(x=dose, y=MeanLen, group = supp, colour = supp)) +
+    geom_line() +
+    geom_point( size=4, shape=21, fill="white")+
+    ylab("Mean Tooth Length")+
+    xlab("Dose (mg/day)")+
+    ggtitle("Mean Tooth Length vs Dose")
+
+summary(TGData)
+```
+
+###Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose. (Use the techniques from class even if there’s other approaches worth considering)
+```{r}
+supp.t1 <- t.test(len~supp, paired=F, var.equal=T, data=TGData)
+supp.t2 <- t.test(len~supp, paired=F, var.equal=F, data=TGData)
+
+
+supp.result <- data.frame("p-value"=c(supp.t1$p.value, supp.t2$p.value),
+                          "Conf-Low"=c(supp.t1$conf[1],supp.t2$conf[1]),
+                          "Conf-High"=c(supp.t1$conf[2],supp.t2$conf[2]),
+                          row.names=c("Equal Var","Unequal Var"))
+supp.result
+```
+
+###State your conclusions and the assumptions needed for your conclusions.
+
+We can concluded that both orange juice and vitamin C have an impact on tooth growth. We can also concluded that increasing the dosage will increase the impact on tooth growth ove the 0.5 to 2mg/day range.
